@@ -21,15 +21,48 @@ Usage:
 
 ```js
 const {createPref, createWebextStorage} = require("webext-pref");
+
+// create the pref
 const pref = createPref({
   useImage: true,
   excludeElements: "code, .highlight"
-}, createWebextStorage());
+});
 
-pref.ready()
+// connect to a storage and read values.
+pref.connect(createWebextStorage())
   .then(() => {
-    console.log(pref.get("useImage")); // true
+    console.log(pref.get("useImage"));
   });
+```
+
+```js
+// event pattern
+const {createPref, createWebextStorage} = require("webext-pref");
+
+// create the pref
+const pref = createPref({
+  useImage: true,
+  excludeElements: "code, .highlight"
+});
+
+// update settings. Currently, getAll() returns default values.
+updateSettings(pref.getAll());
+
+// add event listener
+pref.on("change", updateSettings);
+
+// connect to a storage, if the value saved in the storage is different from
+// the default, the listener would be called.
+pref.connect(createWebextStorage());
+
+function updateSettings(changes) {
+  if (changes.useImage != null) {
+    // useImage is changed...
+  }
+  if (changes.excludeElements != null) {
+    // excludeElements is changed...
+  }
+}
 ```
 
 API
