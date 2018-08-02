@@ -1,7 +1,10 @@
 /* eslint-env mocha */
 const assert = require("assert");
-const {createPref} = require("..");
+const sinon = require("sinon");
+
+const {createPref, createWebextStorage} = require("..");
 const {createMemoryStorage} = require("./memory-storage");
+const {createBrowserShim} = require("./browser-shim");
 
 describe("pref", () => {
   it("default value", () => {
@@ -30,8 +33,29 @@ describe("pref", () => {
     assert.equal(await pref.setCurrentScope("test1"), true);
     await pref.set("foo", "bar");
     assert.equal(pref.get("foo"), "bar");
-    debugger;
     await pref.setCurrentScope("global");
     assert.equal(pref.get("foo"), "foo");
+  });
+});
+
+describe("storage", () => {
+  it("set, get, changes", async () => {
+    global.browser = createBrowserShim();
+    const storage = createWebextStorage();
+    await Promise.all([
+      storage.set("foo", "bar"),
+      storage.set("baz", "bak")
+    ]);
+    const result = await storage.getMany(["foo", "baz"]);
+    assert.deepStrictEqual(result, {
+      foo: "bar",
+      baz: "bak"
+    });
+    const onChange = sinon.spy();
+    storage.on("change", onChange);
+    await storage.set("foo", "fan");
+    assert.equal(onChange.callCount, 1);
+    assert.deepStrictEqual(onChange.args[0][0], {foo: "fan"});
+    delete global.browser;
   });
 });
