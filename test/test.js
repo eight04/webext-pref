@@ -55,7 +55,7 @@ describe("storage", () => {
     storage.on("change", onChange);
     await storage.set("foo", "fan");
     assert.equal(onChange.callCount, 1);
-    assert.deepStrictEqual(onChange.args[0][0], {foo: "fan"});
+    assert.deepStrictEqual(onChange.lastCall.args[0], {foo: "fan"});
     delete global.browser;
   });
 });
