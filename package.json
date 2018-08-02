@@ -1,0 +1,27 @@
+{
+  "name": "webext-pref",
+  "version": "0.0.0",
+  "description": "A library to help creating scoped settings and options page in webextensions.",
+  "author": "eight04 <eight04@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "event-lite": "^0.1.1"
+  },
+  "scripts": {
+    "lint": "eslint **/*.js --cache",
+    "test": "npm run lint && mocha",
+    "preversion": "npm test",
+    "version": "npm run build && git add .",
+    "postversion": "git push --follow-tags && npm publish"
+  },
+  "devDependencies": {
+    "eslint": "^5.2.0",
+    "mocha": "^5.1.1"
+  },
+  "eslintIgnore": [
+    "dist"
+  ],
+  "files": [
+    "lib"
+  ]
+}
