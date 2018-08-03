@@ -177,30 +177,45 @@ Create a storage object using `browser.storage.local/chrome.storage.local` API.
 ### createView
 
 ```js
-const view = createView(pref: Object, body: Array);
+const destroyView = createView({
+  pref: Object,
+  body: Array,
+  translate?: Object,
+  root: Element
+});
 ```
 
 Create a view object, which can draw HTML elements in the options page.
 
+`pref` is the pref object.
+
 `body` is an array of form element object. Each element has following properties:
 
-* `key: String` - the key of the pref. Only available if `type` is not `section`.
-* `type: String` - the type of the element. Possible values are `text`, `number`, `checkbox`, `textarea`, `radio`, `select`, `color`, or `section`.
-* `label: String` - the label of the form element.
+* `children: Array` - a list of form elements. Only available if `type` is `section`, `checkbox`, `radio`, or `radiogroup`.
+* `format: Function` - a function that transforms model value into view value.
 * `help: String` - some help text for the form element.
-* `learnMore: String` - a URL which the "Learn more" link points to.
-* `children: Array` - a list of form elements. Only available if `type` is `section` or `checkbox`.
+* `key: String` - the key of the pref. Only available if `type` is not `section`.
+* `label: String` - the label of the form element.
+* `learnMore: String` - a URL that the "Learn more" link points to.
+* `multiple: Boolean` - on available if `type` is `select`.
+* `options: Object` - a value/label map. Options of `select` element. Only available if `type` is `select`.
+* `parse: Function` - a function that transforms view value into model value
+* `type: String` - the type of the element. Possible values are `text`, `number`, `checkbox`, `textarea`, `radiogroup`, `select`, `color`, or `section`.
 
-#### view.build
+`translate` is a key/message map. The interface uses following messages:
 
-```js
-const root = document.querySelector("#options");
-const destroy = view.build(root);
-```
+| message name | default text |
+|-----|--------------|
+|`inputNewScopeName`|`Add new scope`|
+|`learnMore`|`Learn more`|
 
-Build HTML elements to the specified root.
+`root` is a HTML element.
 
-When `destroy` function is called, the elements would be destroyed, event listeners are unbinded from elements and the pref.
+When `destroyView` function is called, root element will be emptied and event listeners will be unbinded from the pref object.
+
+#### section
+
+#### radiogroup
 
 Changelog
 ---------
