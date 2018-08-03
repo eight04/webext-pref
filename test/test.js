@@ -78,6 +78,17 @@ describe("view", () => {
         }
       ]
     });
+    
+    assert.equal(document.querySelector("input").value, "bar");
+    await pref.set("foo", "baz");
+    assert.equal(document.querySelector("input").value, "baz");
+    await pref.addScope("test1");
+    await pref.setCurrentScope("test1");
+    await pref.set("foo", "bak");
+    assert.equal(document.querySelector("input").value, "bak");
+    await pref.deleteScope("test1");
+    assert.equal(document.querySelector("input").value, "baz");
+    
     destroyView();
     cleanup();
   });

@@ -46,7 +46,7 @@ function createPref(DEFAULT) {
   function updateCache(changes, rebuildCache = false) {
     if (changes.scopeList) {
       scopeList = changes.scopeList;
-      events.emit("scopeListChange");
+      events.emit("scopeListChange", scopeList);
       if (!scopeList.includes(currentScope)) {
         return setCurrentScope("global");
       }
@@ -119,7 +119,7 @@ function createPref(DEFAULT) {
       .then(changes => {
         currentScope = newScope;
         scopedCache = {};
-        events.emit("scopeChange");
+        events.emit("scopeChange", currentScope);
         updateCache(changes, true);
         return true;
       });
