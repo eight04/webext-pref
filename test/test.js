@@ -1,8 +1,10 @@
 /* eslint-env mocha */
 const assert = require("assert");
-const sinon = require("sinon");
 
-const {createPref, createWebextStorage} = require("..");
+const sinon = require("sinon");
+const jsdomGlobal = require("jsdom-global");
+
+const {createPref, createWebextStorage, createView} = require("..");
 const {createMemoryStorage} = require("./memory-storage");
 const {createBrowserShim} = require("./browser-shim");
 
@@ -57,5 +59,26 @@ describe("storage", () => {
     assert.equal(onChange.callCount, 1);
     assert.deepStrictEqual(onChange.lastCall.args[0], {foo: "fan"});
     delete global.browser;
+  });
+});
+
+describe("view", () => {
+  it("build", async () => {
+    const cleanup = jsdomGlobal();
+    const pref = createPref({foo: "bar"});
+    await pref.connect(createMemoryStorage());
+    const destroyView = createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "text",
+          label: "Set value for foo"
+        }
+      ]
+    });
+    destroyView();
+    cleanup();
   });
 });
