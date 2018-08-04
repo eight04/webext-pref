@@ -229,6 +229,6 @@ TBD
 Changelog
 ---------
 
-* 0.1.0 (Next)
+* 0.1.0 (Aug 4, 2018)
 
   - First release.
