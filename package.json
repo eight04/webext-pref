@@ -20,8 +20,7 @@
     "jsdom": "^11.12.0",
     "jsdom-global": "^3.0.2",
     "mocha": "^5.1.1",
-    "nyc": "^12.0.2",
-    "sinon-chrome": "^2.3.2"
+    "nyc": "^12.0.2"
   },
   "eslintIgnore": [
     "dist",
