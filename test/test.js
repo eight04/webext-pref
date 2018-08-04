@@ -63,8 +63,19 @@ describe("storage", () => {
 });
 
 describe("view", () => {
+  let cleanup;
+  
+  beforeEach(function () {
+    this.timeout(5000);
+    cleanup = jsdomGlobal();
+  });
+  
+  afterEach(() => {
+    cleanup();
+    cleanup = null;
+  });
+  
   it("sync with pref", async () => {
-    const cleanup = jsdomGlobal();
     const pref = createPref({foo: "bar"});
     await pref.connect(createMemoryStorage());
     const destroyView = createView({
@@ -90,6 +101,5 @@ describe("view", () => {
     assert.equal(document.querySelector("input").value, "baz");
     
     destroyView();
-    cleanup();
   });
 });
