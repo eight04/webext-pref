@@ -229,6 +229,10 @@ TBD
 Changelog
 ---------
 
+* 0.1.1 (Aug 4, 2018)
+
+  - Fix: missing index.js.
+
 * 0.1.0 (Aug 4, 2018)
 
   - First release.
