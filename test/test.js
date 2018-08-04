@@ -63,7 +63,7 @@ describe("storage", () => {
 });
 
 describe("view", () => {
-  it("build", async () => {
+  it("sync with pref", async () => {
     const cleanup = jsdomGlobal();
     const pref = createPref({foo: "bar"});
     await pref.connect(createMemoryStorage());
