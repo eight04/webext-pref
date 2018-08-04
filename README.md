@@ -20,7 +20,8 @@ Installation
 npm install webext-pref
 ```
 
-Usage:
+Usage
+-----
 
 ```js
 const {createPref, createWebextStorage} = require("webext-pref");
@@ -38,8 +39,9 @@ pref.connect(createWebextStorage())
   });
 ```
 
+Event pattern:
+
 ```js
-// event pattern
 const {createPref, createWebextStorage} = require("webext-pref");
 
 // create the pref
@@ -216,9 +218,13 @@ Create a view object, which can draw HTML elements in the options page.
 
 When `destroyView` function is called, root element will be emptied and event listeners will be unbinded from the pref object.
 
-#### section
+#### Create multiple sections
 
-#### radiogroup
+TBD
+
+#### Create radio group
+
+TBD
 
 Changelog
 ---------
