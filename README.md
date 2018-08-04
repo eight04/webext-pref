@@ -1,6 +1,9 @@
 webext-pref
 ===========
 
+[![Build Status](https://travis-ci.org/eight04/webext-pref.svg?branch=master)](https://travis-ci.org/eight04/webext-pref)
+[![codecov](https://codecov.io/gh/eight04/webext-pref/branch/master/graph/badge.svg)](https://codecov.io/gh/eight04/webext-pref)
+
 A library to help creating scoped settings and options page in webextensions.
 
 Features
