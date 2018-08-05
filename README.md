@@ -229,6 +229,10 @@ TBD
 Changelog
 ---------
 
+* 0.1.2 (Aug 5, 2018)
+
+  - Adjust file tree for better code splitting.
+
 * 0.1.1 (Aug 4, 2018)
 
   - Fix: missing index.js.
