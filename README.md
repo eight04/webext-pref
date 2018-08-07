@@ -90,23 +90,31 @@ Create a `pref` object.
 * `defaults` - A map of `key` - `defaultValue` pairs.
 * `storage` - You can create the storage object with `createGMStorage` or `createWebextStorage`.
 
-#### pref.ready
+#### pref.connect
 
 ```js
-await pref.ready();
+await pref.connect(storage);
 ```
 
-Wait until the `global` setting are read from the storage.
+Connect to a storage object then read the `global` settings into the pref object.
+
+#### pref.disconnect
+
+```js
+pref.disconnect();
+```
+
+Disconnect from the storage object and unregister event listeners.
 
 #### pref.setCurrentScope
 
 ```js
-await pref.setCurrentScope(scope: String = "global");
+const success = await pref.setCurrentScope(scope: String);
 ```
 
 Set the current scope and read the setting from the storage.
 
-If the scope doesn't exist, it fallbacks to `"global"`.
+If the scope doesn't exist, the scope won't change and `success` will be `false`.
 
 #### pref.getCurrentScope
 
@@ -132,10 +140,10 @@ await pref.deleteScope(scope: String);
 
 Delete a scope from the scope list.
 
-#### pref.getScopes
+#### pref.getScopeList
 
 ```js
-const scopes = pref.getScopes();
+const scopes = pref.getScopeList();
 ```
 
 Get the scope list.
@@ -174,40 +182,42 @@ pref.off(event, callback);
 ### createWebextStorage
 
 ```js
-const storage = createWebextStorage();
+const storage = createWebextStorage(area?: String);
 ```
 
-Create a storage object using `browser.storage.local/chrome.storage.local` API.
+Create a storage object using `browser.storage/chrome.storage` API.
+
+`area` could be `"local"` or `"sync"`. Default: `"local"`.
 
 ### createView
 
 ```js
 const destroyView = createView({
   pref: Object,
-  body: Array,
+  body: Array<Object>,
   translate?: Object,
-  root: Element
+  root: Element,
+  getNewScope?: () => newScopeName: String
 });
 ```
 
-Create a view object, which can draw HTML elements in the options page.
+Draw the options page on specified element.
 
 `pref` is the pref object.
 
-`body` is an array of form element object. Each element has following properties:
+`body` is an array of object. Each item has following properties:
 
-* `children: Array` - a list of form elements. Only available if `type` is `section`, `checkbox`, `radio`, or `radiogroup`.
-* `format: Function` - a function that transforms model value into view value.
-* `help: String` - some help text for the form element.
-* `key: String` - the key of the pref. Only available if `type` is not `section`.
-* `label: String` - the label of the form element.
-* `learnMore: String` - a URL that the "Learn more" link points to.
-* `multiple: Boolean` - on available if `type` is `select`.
-* `options: Object` - a value/label map. Options of `select` element. Only available if `type` is `select`.
-* `parse: Function` - a function that transforms view value into model value
-* `type: String` - the type of the element. Possible values are `text`, `number`, `checkbox`, `textarea`, `radiogroup`, `select`, `color`, or `section`.
+* `children?: Array` - a list of child items. Only available if `type` is `section`, `checkbox`, `radio`, or `radiogroup`. Note that child items of `radiogroup` must be `radio`s.
+* `help?: String` - some help text for the item.
+* `key: String` - the key of the pref value. Has no effect if `type` is `section` or `radio`.
+* `label: String` - the label/title of the item.
+* `learnMore?: String` - a URL that the "Learn more" link points to.
+* `multiple?: Boolean` - only available if `type` is `select`. Default: `false`.
+* `options: Object` - a value/label map, the options of `select` element. Only available if `type` is `select`.
+* `type: String` - the type of the item. Possible values are `text`, `number`, `checkbox`, `textarea`, `radiogroup`, `radio`, `select`, `color`, or `section`.
+* `validate?: value => null` - a validating function. To invalidate the input, throw an error that the message is the validation message. If nothing is thrown, the input is considered valid.
 
-`translate` is a key/message map. The interface uses following messages:
+`translate` is a key/message map. It has following messages:
 
 | message name | default text |
 |-----|--------------|
@@ -216,13 +226,15 @@ Create a view object, which can draw HTML elements in the options page.
 
 `root` is a HTML element.
 
+`getNewScope` is a function returning a scope name. It would be used as the default value when the "Add new scope" prompt is shown. Default: `() => ""`.
+
 When `destroyView` function is called, root element will be emptied and event listeners will be unbinded from the pref object.
 
-#### Create multiple sections
+#### Create sections
 
 TBD
 
-#### Create radio group
+#### Create radio groups
 
 TBD
 

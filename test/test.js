@@ -8,6 +8,12 @@ const {createPref, createWebextStorage, createView} = require("..");
 const {createMemoryStorage} = require("./memory-storage");
 const {createBrowserShim} = require("./browser-shim");
 
+function delay(timeout = 0) {
+  return new Promise(resolve => {
+    setTimeout(resolve, timeout);
+  });
+}
+
 describe("pref", () => {
   it("default value", () => {
     const pref = createPref({foo: "foo"});
@@ -66,7 +72,7 @@ describe("view", () => {
   let cleanup;
   
   beforeEach(function () {
-    this.timeout(10000);
+    this.timeout(40000);
     cleanup = jsdomGlobal();
   });
   
@@ -78,7 +84,7 @@ describe("view", () => {
   it("sync with pref", async () => {
     const pref = createPref({foo: "bar"});
     await pref.connect(createMemoryStorage());
-    const destroyView = createView({
+    createView({
       pref,
       root: document.body,
       body: [
@@ -99,7 +105,345 @@ describe("view", () => {
     assert.equal(document.querySelector("input").value, "bak");
     await pref.deleteScope("test1");
     assert.equal(document.querySelector("input").value, "baz");
-    
-    destroyView();
   });
+  
+  it("destroy", async () => {
+    const pref = createPref({foo: "bar"});
+    await pref.connect(createMemoryStorage());
+    
+    assert(!pref.listeners);
+    
+    const destroy = createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "text",
+          label: "Set value for foo"
+        }
+      ]
+    });
+    
+    assert(pref.listeners.change.length);
+    assert(pref.listeners.scopeChange.length);
+    assert(pref.listeners.scopeListChange.length);
+    
+    destroy();
+    
+    assert(!pref.listeners);
+  });
+  
+  it("change scope", async () => {
+    const pref = createPref({foo: "bar"});
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "text",
+          label: "Set value for foo"
+        }
+      ]
+    });
+    
+    await pref.addScope("test1");
+    const select = document.querySelector(".webext-pref-nav select");
+    select.value = "test1";
+    select.dispatchEvent(new Event("change"));
+    await delay();
+    assert.equal(pref.getCurrentScope(), "test1");
+  });
+  
+  it("section", async () => {
+    const pref = createPref({foo: "bar"});
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          type: "section",
+          label: "Set value for foo",
+          children: [
+            {
+              key: "foo",
+              type: "text",
+              label: "label of foo"
+            }
+          ]
+        }
+      ]
+    });
+    
+    assert.equal(document.querySelector(".webext-pref-body").innerHTML, `<div class="webext-pref-section browser-style"><h3 class="webext-pref-header">Set value for foo</h3><div class="webext-pref-text browser-style"><label for="pref-foo">label of foo</label><input type="text" id="pref-foo"></div></div>`);
+  });
+  
+  it("checkbox", async () => {
+    const pref = createPref({foo: true});
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "checkbox",
+          label: "foo label",
+        }
+      ]
+    });
+    const input = document.querySelector("input");
+    assert(input.checked);
+    input.checked = false;
+    input.dispatchEvent(new Event("change"));
+    await delay();
+    assert(!pref.get("foo"));
+  });
+  
+  it("checkbox children", async () => {
+    const pref = createPref({foo: true, bar: false});
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "checkbox",
+          label: "foo label",
+          children: [
+            {
+              key: "bar",
+              type: "checkbox",
+              label: "bar label"
+            }
+          ]
+        }
+      ]
+    });
+    assert(!document.querySelector("fieldset").disabled);
+    await pref.set("foo", false);
+    assert(document.querySelector("fieldset").disabled);
+  });
+  
+  it("radiogroup", async () => {
+    const pref = createPref({gender: "male"});
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "gender",
+          type: "radiogroup",
+          label: "gender label",
+          children: [
+            {
+              type: "radio",
+              label: "♂",
+              value: "male"
+            },
+            {
+              type: "radio",
+              label: "♀",
+              value: "female"
+            }
+          ]
+        }
+      ]
+    });
+    const radios = document.querySelectorAll("input");
+    
+    assert.equal(radios[0].name, "pref-gender");
+    assert.equal(radios[1].name, "pref-gender");
+    
+    assert(radios[0].checked);
+    assert(!radios[1].checked);
+    
+    assert.equal(pref.get("gender"), "male");
+    
+    radios[1].checked = true;
+    radios[1].dispatchEvent(new Event("change"));
+    
+    await delay();
+    
+    assert.equal(pref.get("gender"), "female");
+    
+    assert(!radios[0].checked);
+    assert(radios[1].checked);
+  });
+  
+  it("radiogroup children", async () => {
+    const pref = createPref({
+      gender: "male",
+      maleOnly: "foo",
+      femaleOnly: "bar"
+    });
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "gender",
+          type: "radiogroup",
+          label: "gender label",
+          children: [
+            {
+              type: "radio",
+              label: "♂",
+              value: "male",
+              children: [
+                {
+                  key: "maleOnly",
+                  type: "text",
+                  label: "male only"
+                }
+              ]
+            },
+            {
+              type: "radio",
+              label: "♀",
+              value: "female",
+              children: [
+                {
+                  key: "femaleOnly",
+                  type: "text",
+                  label: "female only"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    });
+    const fieldsets = document.querySelectorAll("fieldset");
+    assert(!fieldsets[0].disabled);
+    assert(fieldsets[1].disabled);
+    await pref.set("gender", "female");
+    assert(fieldsets[0].disabled);
+    assert(!fieldsets[1].disabled);
+  });
+  
+  it("select", async () => {
+    const pref = createPref({
+      foo: "foo"
+    });
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "select",
+          label: "select foo",
+          options: {
+            foo: "I am foo",
+            bar: "You are bar",
+            baz: "He is baz"
+          }
+        }
+      ]
+    });
+    const input = document.querySelector(".webext-pref-body select");
+    assert.equal(input.value, "foo");
+    input.value = "bar";
+    input.dispatchEvent(new Event("change"));
+    await delay();
+    assert.equal(input.selectedOptions[0].textContent, "You are bar");
+    assert.equal(pref.get("foo"), "bar");
+  });
+  
+  // https://github.com/jsdom/jsdom/issues/2326
+  xit("select multiple", async () => {
+    const pref = createPref({
+      foo: ["foo"]
+    });
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "select",
+          label: "select foo",
+          multiple: true,
+          options: {
+            foo: "I am foo",
+            bar: "You are bar",
+            baz: "He is baz"
+          }
+        }
+      ]
+    });
+    const input = document.querySelector(".webext-pref-body select");
+    assert.deepStrictEqual([...input.selectedOptions].map(o => o.value), ["foo"]);
+    input.options[2].selected = true;
+    input.dispatchEvent(new Event("change"));
+    await delay();
+    assert.deepStrictEqual(pref.get("foo"), ["foo", "baz"]);
+  });
+  
+  it("textarea", async () => {
+    const pref = createPref({
+      foo: "foo\nbar"
+    });
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "textarea",
+          label: "foo label"
+        }
+      ]
+    });
+    const input = document.querySelector("textarea");
+    assert.equal(input.nodeName, "TEXTAREA");
+    assert.equal(input.value, "foo\nbar");
+  });
+  
+  it("validate", async () => {
+    const pref = createPref({
+      foo: "123"
+    });
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "text",
+          label: "foo label",
+          validate: value => {
+            if (/\D/.test(value)) {
+              throw new Error("only numbers are allowed");
+            }
+          }
+        }
+      ]
+    });
+    const input = document.querySelector("input");
+    assert(input.validity.valid);
+    input.value = "foo";
+    input.dispatchEvent(new Event("change"));
+    assert(!input.validity.valid);
+    assert.equal(input.validationMessage, "only numbers are allowed");
+    await delay();
+    assert.equal(pref.get("foo"), "123");
+    input.value = "456";
+    input.dispatchEvent(new Event("change"));
+    assert(input.validity.valid);
+    await delay();
+    assert.equal(pref.get("foo"), "456");
+  });
+  
 });
