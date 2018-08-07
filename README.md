@@ -241,6 +241,12 @@ TBD
 Changelog
 ---------
 
+* 0.2.0 (Aug 7, 2018)
+
+  - More tests.
+  - **Drop `parse`, `format` methods in view item**.
+  - Add `validate` method in view item.
+
 * 0.1.2 (Aug 5, 2018)
 
   - Adjust file tree for better code splitting.
