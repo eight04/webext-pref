@@ -289,6 +289,10 @@ Storage.on("change", (changes: Object) => {});
 Changelog
 ---------
 
+* 0.3.1 (Aug 17, 2018)
+
+  - Fix: don't throw when the prompt is canceled.
+
 * 0.3.0 (Aug 17, 2018)
 
   - Add: pref.import, pref.export.
