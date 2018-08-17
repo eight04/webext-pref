@@ -44,16 +44,41 @@ describe("pref", () => {
     await pref.setCurrentScope("global");
     assert.equal(pref.get("foo"), "foo");
   });
+  
+  it("addScope error", async () => {
+    const pref = createPref({foo: "foo"});
+    await pref.connect(createMemoryStorage());
+    await assert.rejects(pref.addScope("global"), /already exists/);
+    await assert.rejects(pref.addScope("in/valid"), /invalid word: \//);
+  });
+  
+  it("import, export", async () => {
+    const pref = createPref({foo: "foo"});
+    await pref.connect(createMemoryStorage());
+    await pref.set("foo", "bar");
+    await pref.addScope("test");
+    await pref.setCurrentScope("test");
+    await pref.set("foo", "baz");
+    const settings = await pref.export();
+    
+    const pref2 = createPref({foo: "foo"}, "$/$");
+    await pref2.connect(createMemoryStorage());
+    assert.equal(pref2.get("foo"), "foo");
+    await pref2.import(settings);
+    assert.equal(pref2.get("foo"), "bar");
+    await pref2.setCurrentScope("test");
+    assert.equal(pref2.get("foo"), "baz");
+  });
 });
 
 describe("storage", () => {
   it("set, get, changes", async () => {
     global.browser = createBrowserShim();
     const storage = createWebextStorage();
-    await Promise.all([
-      storage.set("foo", "bar"),
-      storage.set("baz", "bak")
-    ]);
+    await storage.setMany({
+      foo: "bar",
+      baz: "bak"
+    });
     const result = await storage.getMany(["foo", "baz"]);
     assert.deepStrictEqual(result, {
       foo: "bar",
@@ -61,7 +86,9 @@ describe("storage", () => {
     });
     const onChange = sinon.spy();
     storage.on("change", onChange);
-    await storage.set("foo", "fan");
+    await storage.setMany({
+      foo: "fan"
+    });
     assert.equal(onChange.callCount, 1);
     assert.deepStrictEqual(onChange.lastCall.args[0], {foo: "fan"});
     delete global.browser;
@@ -132,6 +159,51 @@ describe("view", () => {
     destroy();
     
     assert(!pref.listeners);
+  });
+  
+  it("import, export", async () => {
+    const pref = createPref({foo: "bar"});
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "text",
+          label: "Set value for foo"
+        }
+      ]
+    });
+    
+    await pref.set("foo", "bar");
+    const exportButton = document.querySelector(".webext-pref-export");
+    global.prompt = sinon.spy();
+    exportButton.click();
+    await delay();
+    const exported = global.prompt.lastCall.args[1];
+    assert.deepStrictEqual(JSON.parse(exported), {
+      scopeList: ["global"],
+      scopes: {
+        global: {
+          foo: "bar"
+        }
+      }
+    });
+    
+    const importButton = document.querySelector(".webext-pref-import");
+    global.prompt = () => JSON.stringify({
+      scopes: {
+        global: {
+          foo: "baz"
+        }
+      }
+    });
+    importButton.click();
+    await delay();
+    assert.equal(pref.get("foo"), "baz");
+    
+    global.prompt = null;
   });
   
   it("change scope", async () => {

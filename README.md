@@ -164,6 +164,22 @@ await pref.set(key: String, value: Any);
 
 Set the value of `key` in the current scope. *This function returns a promise.*
 
+#### pref.export
+
+```js
+const exported: Object = await pref.export();
+```
+
+Export all settings from the storage.
+
+#### pref.import
+
+```js
+await pref.import(exported: Object);
+```
+
+Import settings into the storage.
+
 #### events
 
 `pref` extends `event-lite`, which has following methods to work with events:
@@ -223,6 +239,10 @@ Draw the options page on specified element.
 |-----|--------------|
 |`inputNewScopeName`|`Add new scope`|
 |`learnMore`|`Learn more`|
+|`import`|`Import`|
+|`export`|`Export`|
+|`pasteSettings`|`Paste settings`|
+|`copySettings`|`Copy settings`|
 
 `root` is a HTML element.
 
@@ -237,6 +257,34 @@ TBD
 #### Create radio groups
 
 TBD
+
+### Storage interface
+
+By implementing this interface, the object could be used by `pref.connect`.
+
+#### Storage.setMany
+
+```js
+await Storage.setMany(settings: Object);
+```
+
+`settings` is a key/value map. `value` could be primitive, array, or plain object.
+
+#### Storage.getMany
+
+```js
+const settings: Object = await Storage.getMany(keys: Array<String>);
+```
+
+Retrieve previously saved values. If `key` doesn't exist in the storage, then `settings[key]` should be `undefined`.
+
+#### Storage.on
+
+```js
+Storage.on("change", (changes: Object) => {});
+```
+
+`changes` is key/value map that the value is changed.
 
 Changelog
 ---------
