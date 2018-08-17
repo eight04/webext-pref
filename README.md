@@ -82,18 +82,19 @@ This module exports following members:
 ### createPref
 
 ```js
-const pref = createPref(defaults: Object, storage: Object);
+const pref = createPref(default: Object, separator: String = "/");
 ```
 
 Create a `pref` object.
 
-* `defaults` - A map of `key` - `defaultValue` pairs.
-* `storage` - You can create the storage object with `createGMStorage` or `createWebextStorage`.
+`default` is a map of `key`/`defaultValue` pairs.
+
+`separator` would be used as the separator between the scope name and the actual key. You should choose a separator that won't appear in the key or the scope name.
 
 #### pref.connect
 
 ```js
-await pref.connect(storage);
+await pref.connect(storage: Object);
 ```
 
 Connect to a storage object then read the `global` settings into the pref object.
