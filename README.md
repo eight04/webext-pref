@@ -289,6 +289,12 @@ Storage.on("change", (changes: Object) => {});
 Changelog
 ---------
 
+* 0.3.0 (Aug 17, 2018)
+
+  - Add: pref.import, pref.export.
+  - Add: import/export buttons in createView.
+  - Change: replace Storage.set with Storage.setMany.
+
 * 0.2.0 (Aug 7, 2018)
 
   - More tests.
