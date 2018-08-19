@@ -8,6 +8,8 @@ const {createPref, createWebextStorage, createView} = require("..");
 const {createMemoryStorage} = require("./memory-storage");
 const {createBrowserShim} = require("./browser-shim");
 
+const testStorage = require("./test-storage.js");
+
 function delay(timeout = 0) {
   return new Promise(resolve => {
     setTimeout(resolve, timeout);
@@ -71,28 +73,14 @@ describe("pref", () => {
   });
 });
 
-describe("storage", () => {
-  it("set, get, changes", async () => {
+testStorage({
+  createStorage: createWebextStorage,
+  setup() {
     global.browser = createBrowserShim();
-    const storage = createWebextStorage();
-    await storage.setMany({
-      foo: "bar",
-      baz: "bak"
-    });
-    const result = await storage.getMany(["foo", "baz"]);
-    assert.deepStrictEqual(result, {
-      foo: "bar",
-      baz: "bak"
-    });
-    const onChange = sinon.spy();
-    storage.on("change", onChange);
-    await storage.setMany({
-      foo: "fan"
-    });
-    assert.equal(onChange.callCount, 1);
-    assert.deepStrictEqual(onChange.lastCall.args[0], {foo: "fan"});
+  },
+  cleanup() {
     delete global.browser;
-  });
+  }
 });
 
 describe("view", () => {
