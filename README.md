@@ -290,6 +290,11 @@ Storage.on("change", (changes: Object) => {});
 Changelog
 ---------
 
+* 0.3.4 (Aug 19, 2018)
+
+  - Fix: failed to create view if some keys are missing in the body.
+  - Fix: the number input returns string value in view.
+
 * 0.3.3 (Aug 19, 2018)
 
   - Add: undefined key test in storage test suite.
