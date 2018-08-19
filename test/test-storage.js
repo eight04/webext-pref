@@ -18,11 +18,15 @@ module.exports = ({createStorage, setup, cleanup}) => {
     
     it("set, get, changes", async () => {
       const storage = createStorage();
+      let result;
+      result = await storage.getMany(["foo", "baz"]);
+      assert.equal(result.foo, undefined);
+      assert.equal(result.baz, undefined);
       await storage.setMany({
         foo: "bar",
         baz: "bak"
       });
-      const result = await storage.getMany(["foo", "baz"]);
+      result = await storage.getMany(["foo", "baz"]);
       assert.deepStrictEqual(result, {
         foo: "bar",
         baz: "bak"
