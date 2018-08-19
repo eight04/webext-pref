@@ -290,6 +290,10 @@ Storage.on("change", (changes: Object) => {});
 Changelog
 ---------
 
+* 0.3.2 (Aug 19, 2018)
+
+  - Add: include storage test suite.
+
 * 0.3.1 (Aug 17, 2018)
 
   - Fix: don't throw when the prompt is canceled.
