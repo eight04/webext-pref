@@ -290,6 +290,10 @@ Storage.on("change", (changes: Object) => {});
 Changelog
 ---------
 
+* 0.3.5 (Aug 20, 2018)
+
+  - Fix: the initial value of the current scope is wrong.
+
 * 0.3.4 (Aug 19, 2018)
 
   - Fix: failed to create view if some keys are missing in the body.
