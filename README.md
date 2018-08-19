@@ -290,6 +290,10 @@ Storage.on("change", (changes: Object) => {});
 Changelog
 ---------
 
+* 0.3.3 (Aug 19, 2018)
+
+  - Add: undefined key test in storage test suite.
+
 * 0.3.2 (Aug 19, 2018)
 
   - Add: include storage test suite.
