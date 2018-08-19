@@ -194,6 +194,27 @@ describe("view", () => {
     global.prompt = null;
   });
   
+  it("with scope", async () => {
+    const pref = createPref({foo: "bar"});
+    await pref.connect(createMemoryStorage());
+    await pref.addScope("test");
+    await pref.setCurrentScope("test");
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "text",
+          label: "Set value for foo"
+        }
+      ]
+    });
+    
+    const select = document.querySelector(".webext-pref-nav select");
+    assert.equal(select.value, "test");
+  });
+  
   it("change scope", async () => {
     const pref = createPref({foo: "bar"});
     await pref.connect(createMemoryStorage());
