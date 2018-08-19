@@ -470,6 +470,28 @@ describe("view", () => {
     assert.equal(input.value, "foo\nbar");
   });
   
+  it("number", async () => {
+    const pref = createPref({
+      foo: 5
+    });
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "number",
+          label: "foo label"
+        }
+      ]
+    });
+    const input = document.querySelector("input");
+    input.value = "7";
+    input.dispatchEvent(new Event("change"));
+    assert.strictEqual(pref.get("foo"), 7);
+  });
+  
   it("validate", async () => {
     const pref = createPref({
       foo: "123"
