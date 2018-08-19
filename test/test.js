@@ -217,6 +217,16 @@ describe("view", () => {
     assert.equal(pref.getCurrentScope(), "test1");
   });
   
+  it("empty body", async () => {
+    const pref = createPref({foo: "bar"});
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: []
+    });
+  });
+  
   it("section", async () => {
     const pref = createPref({foo: "bar"});
     await pref.connect(createMemoryStorage());
