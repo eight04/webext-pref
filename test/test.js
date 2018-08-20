@@ -449,8 +449,7 @@ describe("view", () => {
     assert.equal(pref.get("foo"), "bar");
   });
   
-  // https://github.com/jsdom/jsdom/issues/2326
-  xit("select multiple", async () => {
+  it("select multiple", async () => {
     const pref = createPref({
       foo: ["foo"]
     });
