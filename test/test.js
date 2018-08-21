@@ -150,6 +150,9 @@ describe("view", () => {
   });
   
   it("import, export", async () => {
+    let promptResult;
+    global.prompt = sinon.spy(() => promptResult);
+    
     const pref = createPref({foo: "bar"});
     await pref.connect(createMemoryStorage());
     createView({
@@ -166,7 +169,6 @@ describe("view", () => {
     
     await pref.set("foo", "bar");
     const exportButton = document.querySelector(".webext-pref-export");
-    global.prompt = sinon.spy();
     exportButton.click();
     await delay();
     const exported = global.prompt.lastCall.args[1];
@@ -180,7 +182,7 @@ describe("view", () => {
     });
     
     const importButton = document.querySelector(".webext-pref-import");
-    global.prompt = () => JSON.stringify({
+    promptResult = JSON.stringify({
       scopes: {
         global: {
           foo: "baz"
@@ -191,7 +193,7 @@ describe("view", () => {
     await delay();
     assert.equal(pref.get("foo"), "baz");
     
-    global.prompt = null;
+    delete global.prompt;
   });
   
   it("with scope", async () => {
@@ -213,6 +215,98 @@ describe("view", () => {
     
     const select = document.querySelector(".webext-pref-nav select");
     assert.equal(select.value, "test");
+  });
+  
+  it("add scope, delete scope", async () => {
+    let promptResult;
+    let confirmResult;
+    global.prompt = sinon.spy(() => promptResult);
+    global.confirm = sinon.spy(() => confirmResult);
+    
+    const pref = createPref({foo: "bar"});
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "text",
+          label: "Set value for foo"
+        }
+      ]
+    });
+    
+    const addButton = document.querySelector(".webext-pref-add-scope");
+    const deleteButton = document.querySelector(".webext-pref-delete-scope");
+    promptResult = "foo";
+    addButton.click();
+    promptResult = "bar";
+    addButton.click();
+    
+    await delay();
+    assert.deepStrictEqual(pref.getScopeList(), ["global", "foo", "bar"]);
+    
+    confirmResult = true;
+    deleteButton.click();
+    await delay();
+    assert.deepStrictEqual(pref.getScopeList(), ["global", "foo"]);
+    
+    confirmResult = false;
+    deleteButton.click();
+    await delay();
+    assert.deepStrictEqual(pref.getScopeList(), ["global", "foo"]);
+    
+    delete global.prompt;
+    delete global.confirm;
+  });
+  
+  it("getMessage", async () => {
+    const pref = createPref({foo: "bar"});
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "text",
+          label: "Set value for foo"
+        }
+      ],
+      getMessage: key => {
+        if (key === "importButton") {
+          return "foo";
+        }
+      }
+    });
+    
+    const button = document.querySelector(".webext-pref-import");
+    assert.equal(button.textContent, "foo");
+  });
+  
+  it("getNewScope", async () => {
+    const prompt = sinon.spy(async () => {});
+    const pref = createPref({foo: "bar"});
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "text",
+          label: "Set value for foo"
+        }
+      ],
+      getNewScope: () => "foo",
+      prompt
+    });
+    
+    const button = document.querySelector(".webext-pref-add-scope");
+    button.click();
+    await delay();
+    assert.equal(prompt.lastCall.args[1], "foo");
   });
   
   it("change scope", async () => {

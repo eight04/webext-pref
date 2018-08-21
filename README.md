@@ -212,9 +212,12 @@ Create a storage object using `browser.storage/chrome.storage` API.
 const destroyView = createView({
   pref: Object,
   body: Array<Object>,
-  translate?: Object,
   root: Element,
-  getNewScope?: () => newScopeName: String
+  getNewScope?: () => newScopeName: String,
+  getMessage?: (key: String, params?: String|Array<String>) => localizedString: String|undefined,
+  alert?: async message => undefined,
+  confirm?: async message => Boolean,
+  prompt?: async (message, defaultValue) => inputValue: String
 });
 ```
 
@@ -234,20 +237,34 @@ Draw the options page on specified element.
 * `type: String` - the type of the item. Possible values are `text`, `number`, `checkbox`, `textarea`, `radiogroup`, `radio`, `select`, `color`, or `section`.
 * `validate?: value => null` - a validating function. To invalidate the input, throw an error that the message is the validation message. If nothing is thrown, the input is considered valid.
 
-`translate` is a key/message map. It has following messages:
-
-| message name | default text |
-|-----|--------------|
-|`inputNewScopeName`|`Add new scope`|
-|`learnMore`|`Learn more`|
-|`import`|`Import`|
-|`export`|`Export`|
-|`pasteSettings`|`Paste settings`|
-|`copySettings`|`Copy settings`|
-
 `root` is a HTML element.
 
-`getNewScope` is a function returning a scope name. It would be used as the default value when the "Add new scope" prompt is shown. Default: `() => ""`.
+`getNewScope` is a function returning a scope name, which would be used as the default value when the "Add new scope" prompt is shown. Default: `() => ""`.
+
+`getMessage` is a function that is used to get localized strings. The signature is identical to `browser.i18n.getMessage`. `createView` would call this function with a key and some params. If this function returns undefined, `createView` would use the default text.
+
+| key | params | default text |
+|-----|------- | ------------ |
+|`addScopePrompt`||`Add new scope`|
+|`deleteScopeConfirm`|`scopeName`|`Delete scope ${scopeName}?`|
+|`learnMoreButton`||`Learn more`|
+|`importButton`||`Import`|
+|`importPrompt`||`Paste settings`|
+|`exportButton`||`Export`|
+|`exportPrompt`||`Copy settings`|
+
+`prompt`, `alert`, and `confirm` are used to display dialogs. By default, the library uses global function `prompt`, `alert`, and `confirm`.
+
+You may want to provide your own dialog functions when using `createView` in Chrome's `options_ui` (because of [this bug](https://bugs.chromium.org/p/chromium/issues/detail?id=476350)). Here is an example:
+
+```js
+createView({
+  ...
+  alert: async message => chrome.extension.getBackgroundPage().alert(message),
+  confirm: async message => chrome.extension.getBackgroundPage().confirm(message),
+  prompt: async (message, default = "") => chrome.extension.getBackgroundPage().prompt(message, default)
+});
+```
 
 When `destroyView` function is called, root element will be emptied and event listeners will be unbinded from the pref object.
 
