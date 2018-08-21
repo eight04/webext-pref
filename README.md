@@ -9,8 +9,8 @@ A library to help creating scoped settings and options page in webextensions.
 Features
 --------
 
-* Define an abstracted storage so it is possible to work with different storage systems e.g. [GM_webextPref](https://github.com/eight04/gm-webext-pref).
-* Support multiple profiles, which allows you to apply config conditionally e.g. use different config on different domains.
+* Define an abstracted storage so it is possible to work with different storage systems e.g. [GM_webextPref](https://github.com/eight04/GM_webextPref).
+* Support multiple scopes (profiles), which allows you to apply config conditionally e.g. use different config on different domains.
 * Build the options page by passing config names and labels.
 
 Installation
@@ -306,6 +306,12 @@ Storage.on("change", (changes: Object) => {});
 
 Changelog
 ---------
+
+* 0.4.0 (Aug 21, 2018)
+
+  - **Drop: translate arg in `createView`.**
+  - Add: `getMessage` arg in `createView`.
+  - Add: `alert`, `confirm`, and `prompt` arg in `createView`.  
 
 * 0.3.5 (Aug 20, 2018)
 
