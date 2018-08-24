@@ -245,7 +245,10 @@ Draw the options page on specified element.
 
 | key | params | default text |
 |-----|------- | ------------ |
+|`currentScopeLabel`||`Current scope`|
+|`addScopeLabel`||`Add new scope`|
 |`addScopePrompt`||`Add new scope`|
+|`deleteScopeLabel`||`Delete current scope`|
 |`deleteScopeConfirm`|`scopeName`|`Delete scope ${scopeName}?`|
 |`learnMoreButton`||`Learn more`|
 |`importButton`||`Import`|
