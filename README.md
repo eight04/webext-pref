@@ -310,6 +310,11 @@ Storage.on("change", (changes: Object) => {});
 Changelog
 ---------
 
+* 0.4.1 (Aug 24, 2018)
+
+  - Add: tooltip for nav controls.
+  - Change: replace `x` with multiplication sign `×`.
+
 * 0.4.0 (Aug 21, 2018)
 
   - **Drop: translate arg in `createView`.**
