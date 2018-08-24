@@ -38,12 +38,25 @@ describe("pref", () => {
   it("scoped values", async () => {
     const pref = createPref({foo: "foo"});
     await pref.connect(createMemoryStorage());
+    
     assert.equal(await pref.setCurrentScope("test1"), false);
     await pref.addScope("test1");
     assert.equal(await pref.setCurrentScope("test1"), true);
+    
     await pref.set("foo", "bar");
     assert.equal(pref.get("foo"), "bar");
+    
     await pref.setCurrentScope("global");
+    assert.equal(pref.get("foo"), "foo");
+    
+    await pref.setCurrentScope("test1");
+    assert.equal(pref.get("foo"), "bar");
+    
+    await pref.deleteScope("test1");
+    assert.equal(pref.get("foo"), "foo");
+    
+    await pref.addScope("test1");
+    await pref.setCurrentScope("test1");
     assert.equal(pref.get("foo"), "foo");
   });
   

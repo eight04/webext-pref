@@ -7,7 +7,8 @@ function createBrowserShim() {
     storage: {
       local: {
         get,
-        set
+        set,
+        remove
       },
       onChanged: {
         addListener,
@@ -40,6 +41,20 @@ function createBrowserShim() {
     }
     events.emit("change", realChanges, "local");
     return Promise.resolve(realChanges);
+  }
+  
+  function remove(keys) {
+    const changes = {};
+    for (const key of keys) {
+      if (storage.has(key)) {
+        changes[key] = {
+          oldValue: storage.get(key)
+        };
+        storage.delete(key);
+      }
+    }
+    events.emit("change", changes, "local");
+    return Promise.resolve(changes);
   }
   
   function addListener(fn) {

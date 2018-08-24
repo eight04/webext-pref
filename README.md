@@ -199,12 +199,34 @@ pref.off(event, callback);
 ### createWebextStorage
 
 ```js
-const storage = createWebextStorage(area?: String);
+const storage = createWebextStorage(area?: String, prefix?: String);
 ```
 
 Create a storage object using `browser.storage/chrome.storage` API.
 
 `area` could be `"local"` or `"sync"`. Default: `"local"`.
+
+`prefix` is used to create isolated `storage` objects. Default: `"webext-pref/"`. For example:
+
+```js
+const pref = createPref({
+  foo: "bar"
+});
+await pref.connect(createWebextStorage("local", "module-settings/"));
+await pref.set("foo", "baz");
+
+const pref2 = createPref({
+  foo: "baz"
+});
+await pref2.connect(createWebextStorage("local", "extension-settings/"));
+await pref2.set("foo", "bak");
+
+console.log(pref.get("foo"), pref2.get("foo")); // "baz", "bak"
+
+// `pref` and `pref2` both use `browser.storage.local` API but they have
+// different prefix so "foo" is actually saved as "module-settings/global/foo"
+// and "extension-settings/global/foo"
+```
 
 ### createView
 
@@ -299,13 +321,21 @@ const settings: Object = await Storage.getMany(keys: Array<String>);
 
 Retrieve previously saved values. If `key` doesn't exist in the storage, then `settings[key]` should be `undefined`.
 
+#### Storage.deleteMany
+
+```js
+await Storage.deleteMany(keys: Array<String>);
+```
+
+Delete values from the storage.
+
 #### Storage.on
 
 ```js
 Storage.on("change", (changes: Object) => {});
 ```
 
-`changes` is key/value map that the value is changed.
+`changes` is `key`/`newValue` map that the value is changed. If the `key` is deleted, `newValue` is `undefined`.
 
 Changelog
 ---------

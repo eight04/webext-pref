@@ -22,6 +22,7 @@ module.exports = ({createStorage, setup, cleanup}) => {
       result = await storage.getMany(["foo", "baz"]);
       assert.equal(result.foo, undefined);
       assert.equal(result.baz, undefined);
+      
       await storage.setMany({
         foo: "bar",
         baz: "bak"
@@ -31,6 +32,12 @@ module.exports = ({createStorage, setup, cleanup}) => {
         foo: "bar",
         baz: "bak"
       });
+      
+      await storage.deleteMany(["foo"]);
+      result = await storage.getMany(["foo", "baz"]);
+      assert.equal(result.foo, undefined);
+      assert.equal(result.baz, "bak");
+      
       const onChange = sinon.spy();
       storage.on("change", onChange);
       await storage.setMany({
@@ -38,6 +45,9 @@ module.exports = ({createStorage, setup, cleanup}) => {
       });
       assert.equal(onChange.callCount, 1);
       assert.deepStrictEqual(onChange.lastCall.args[0], {foo: "fan"});
+      await storage.deleteMany(["foo"]);
+      assert.equal(onChange.callCount, 2);
+      assert.deepStrictEqual(onChange.lastCall.args[0], {foo: undefined});
     });
   });
 };
