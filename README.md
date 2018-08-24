@@ -340,6 +340,12 @@ Storage.on("change", (changes: Object) => {});
 Changelog
 ---------
 
+* 0.5.0 (Aug 24, 2018)
+
+  - **Change: the shape of `Storage` is changed. Added `Storage.deleteMany`.**
+  - Fix: scoped values are not deleted when deleting a scope.
+  - Add: `prefix` arg in `createWebextStorage`.
+
 * 0.4.1 (Aug 24, 2018)
 
   - Add: tooltip for nav controls.
