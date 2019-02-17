@@ -666,3 +666,23 @@ describe("view", () => {
   });
   
 });
+
+describe("promisify", () => {
+  beforeEach(() => {
+    global.chrome = {runtime: {}};
+  });
+  
+  afterEach(() => {
+    delete global.chrome;
+  });
+  
+  it("error", async () => {
+    const promisify = require("../lib/promisify");
+    function apiCall(arg, cb) {
+      global.chrome.runtime.lastError = new Error(`my error: ${arg}`);
+      cb();
+    }
+    const asyncAPICall = promisify(apiCall);
+    await assert.rejects(asyncAPICall("foo"), /my error: foo/);
+  });
+});
