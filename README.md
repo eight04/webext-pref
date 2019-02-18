@@ -340,6 +340,10 @@ Storage.on("change", (changes: Object) => {});
 Changelog
 ---------
 
+* 0.5.1 (Feb 18, 2019)
+
+  - Fix: webextStorage doesn't report errors correctly in Chrome.
+
 * 0.5.0 (Aug 24, 2018)
 
   - **Change: the shape of `Storage` is changed. Added `Storage.deleteMany`.**
