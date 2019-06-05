@@ -15,12 +15,12 @@
   },
   "main": "index.js",
   "devDependencies": {
-    "c8": "^3.4.0",
-    "eslint": "^5.14.0",
-    "jsdom": "^13.2.0",
+    "c8": "^5.0.1",
+    "eslint": "^5.16.0",
+    "jsdom": "^15.1.1",
     "jsdom-global": "^3.0.2",
-    "mocha": "^5.1.1",
-    "sinon": "^7.2.3"
+    "mocha": "^6.1.4",
+    "sinon": "^7.3.2"
   },
   "eslintIgnore": [
     "dist",
