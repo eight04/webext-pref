@@ -82,7 +82,7 @@ This module exports following members:
 ### createPref
 
 ```js
-const pref = createPref(default: Object, separator: String = "/");
+createPref(default: Object, separator: String = "/") => Pref
 ```
 
 Create a `pref` object.
@@ -94,7 +94,7 @@ Create a `pref` object.
 #### pref.connect
 
 ```js
-await pref.connect(storage: Object);
+async pref.connect(storage: Object) => void
 ```
 
 Connect to a storage object then read the `global` settings into the pref object.
@@ -102,7 +102,7 @@ Connect to a storage object then read the `global` settings into the pref object
 #### pref.disconnect
 
 ```js
-pref.disconnect();
+pref.disconnect() => void
 ```
 
 Disconnect from the storage object and unregister event listeners.
@@ -110,7 +110,7 @@ Disconnect from the storage object and unregister event listeners.
 #### pref.setCurrentScope
 
 ```js
-const success = await pref.setCurrentScope(scope: String);
+async pref.setCurrentScope(scope: String) => success: Boolean
 ```
 
 Set the current scope and read the setting from the storage.
@@ -120,7 +120,7 @@ If the scope doesn't exist, the scope won't change and `success` will be `false`
 #### pref.getCurrentScope
 
 ```js
-const currentScope = pref.getCurrentScope();
+pref.getCurrentScope() => currentScope: String
 ```
 
 Get the current scope.
@@ -128,7 +128,7 @@ Get the current scope.
 #### pref.addScope
 
 ```js
-await pref.addScope(scope: String);
+async pref.addScope(scope: String) => void
 ```
 
 Insert a new scope to the scope list.
@@ -136,7 +136,7 @@ Insert a new scope to the scope list.
 #### pref.deleteScope
 
 ```js
-await pref.deleteScope(scope: String);
+async pref.deleteScope(scope: String) => void
 ```
 
 Delete a scope from the scope list.
@@ -144,7 +144,7 @@ Delete a scope from the scope list.
 #### pref.getScopeList
 
 ```js
-const scopes = pref.getScopeList();
+pref.getScopeList() => Array<scope: String>
 ```
 
 Get the scope list.
@@ -152,7 +152,7 @@ Get the scope list.
 #### pref.get
 
 ```js
-const value = pref.get(key: String);
+pref.get(key: String) => value: Any
 ```
 
 Get the value of `key` from the current scope. If the value doesn't exist, it fallbacks to `global` scope.
@@ -160,7 +160,7 @@ Get the value of `key` from the current scope. If the value doesn't exist, it fa
 #### pref.set
 
 ```js
-await pref.set(key: String, value: Any);
+async pref.set(key: String, value: Any) => void
 ```
 
 Set the value of `key` in the current scope. *This function returns a promise.*
@@ -168,15 +168,15 @@ Set the value of `key` in the current scope. *This function returns a promise.*
 #### pref.export
 
 ```js
-const exported: Object = await pref.export();
+async pref.export() => exportedData: Object
 ```
 
-Export all settings from the storage.
+Export all settings from the storage. You can store the data as text using `JSON.stringify`.
 
 #### pref.import
 
 ```js
-await pref.import(exported: Object);
+async pref.import(exportedData: Object) => void
 ```
 
 Import settings into the storage.
@@ -193,16 +193,16 @@ pref.off(event, callback);
 
 `pref` emits following events:
 
-* `change` - if the value of any key is changed. The callback would receive a `changes` object that is a `key` - `newValue` map.
+* `change` - if the value of any key is changed. The callback would receive a `changes` object that is a `key` -> `newValue` map.
 
 
 ### createWebextStorage
 
 ```js
-const storage = createWebextStorage(area?: String, prefix?: String);
+createWebextStorage(area?: String, prefix?: String) => WebextStorage
 ```
 
-Create a storage object using `browser.storage/chrome.storage` API.
+Create a storage object which implements the `Storage` interface and is built on top of `browser.storage`/`chrome.storage` extension API.
 
 `area` could be `"local"` or `"sync"`. Default: `"local"`.
 
@@ -231,33 +231,24 @@ console.log(pref.get("foo"), pref2.get("foo")); // "baz", "bak"
 ### createView
 
 ```js
-const destroyView = createView({
-  pref: Object,
-  body: Array<Object>,
+createView({
+  pref: Pref,
+  body: Array<ViewBodyItem>,
   root: Element,
   getNewScope?: () => newScopeName: String,
-  getMessage?: (key: String, params?: String|Array<String>) => localizedString: String|undefined,
-  alert?: async message => undefined,
+  getMessage?: (key: String, params?: String | Array<String>) => localizedString?: String,
+  alert?: async message => void,
   confirm?: async message => Boolean,
   prompt?: async (message, defaultValue) => inputValue: String
-});
+})
+  => destroyView: () => void
 ```
 
 Draw the options page on specified element.
 
 `pref` is the pref object.
 
-`body` is an array of object. Each item has following properties:
-
-* `children?: Array` - a list of child items. Only available if `type` is `section`, `checkbox`, `radio`, or `radiogroup`. Note that child items of `radiogroup` must be `radio`s.
-* `help?: String` - some help text for the item.
-* `key: String` - the key of the pref value. Has no effect if `type` is `section` or `radio`.
-* `label: String` - the label/title of the item.
-* `learnMore?: String` - a URL that the "Learn more" link points to.
-* `multiple?: Boolean` - only available if `type` is `select`. Default: `false`.
-* `options: Object` - a value/label map, the options of `select` element. Only available if `type` is `select`.
-* `type: String` - the type of the item. Possible values are `text`, `number`, `checkbox`, `textarea`, `radiogroup`, `radio`, `select`, `color`, or `section`.
-* `validate?: value => null` - a validating function. To invalidate the input, throw an error that the message is the validation message. If nothing is thrown, the input is considered valid.
+`body` is an array of `ViewBodyItem` object:
 
 `root` is a HTML element.
 
@@ -293,6 +284,44 @@ createView({
 
 When `destroyView` function is called, root element will be emptied and event listeners will be unbinded from the pref object.
 
+### ViewBodyItem
+
+An item has following properties:
+
+```js
+{
+  key: String,
+  label: String,
+  type: String,
+  
+  children?: Array<ViewBodyItem>,
+  help?: String,
+  learnMore?: String,
+  multiple?: Boolean,
+  options?: Object<value: String, label: String>,
+  validate?: value => void
+}
+```
+
+`type` can be `text`, `number`, `checkbox`, `textarea`, `radiogroup`, `radio`, `select`, `color`, or `section`. `text`, `number`, `checkbox`, `textarea`, `radiogroup`, `select` and `color` will create a corresponded form element. `radio` type can only be used in `radiogroup`'s children. You can use `section` to create different sections in the pref body.
+
+The value will be stored in pref object with `key`. Except if `type` is `section` or `radio` since these items doesn't store value to the pref.
+
+`label` is the label/title of the item.
+
+
+`children` is a list of child items. Only available if `type` is `section`, `checkbox`, `radio`, or `radiogroup`. Note that child items of `radiogroup` must be `radio`s. If `type` is `checkbox` or `radio`, children elements will be disabled when the item is not checked.
+
+Use `help` to add some help text for the item.
+
+`learnMore` is a URL that the "Learn more" link points to.
+
+If `type` is `select`, you can set `multiple` to `true` to allow users to select multiple options.
+
+`options` is a `value` -> `label` object map. Only available if `type` is `select`.
+
+`validate` is a validating function. To invalidate the input, throw an error that the message is the validation message. If nothing is thrown, the input is considered valid.
+
 #### Create sections
 
 TBD
@@ -303,20 +332,20 @@ TBD
 
 ### Storage interface
 
-By implementing this interface, the object could be used by `pref.connect`.
+By implementing this interface, the object can be used by `pref.connect`.
 
 #### Storage.setMany
 
 ```js
-await Storage.setMany(settings: Object);
+async Storage.setMany(settings: Object<key: String, value: any>) => void
 ```
 
-`settings` is a key/value map. `value` could be primitive, array, or plain object.
+`settings` is a `key` -> `value` map. `value` could be primitive, array, or plain object.
 
 #### Storage.getMany
 
 ```js
-const settings: Object = await Storage.getMany(keys: Array<String>);
+async Storage.getMany(keys: Array<String>) => settings: Object<key: String, value: any>
 ```
 
 Retrieve previously saved values. If `key` doesn't exist in the storage, then `settings[key]` should be `undefined`.
@@ -324,18 +353,38 @@ Retrieve previously saved values. If `key` doesn't exist in the storage, then `s
 #### Storage.deleteMany
 
 ```js
-await Storage.deleteMany(keys: Array<String>);
+async Storage.deleteMany(keys: Array<String>) => void
 ```
 
-Delete values from the storage.
+Delete values from the storage. If `key` doesn't exist, it should be ignored.
 
 #### Storage.on
 
 ```js
-Storage.on("change", (changes: Object) => {});
+Storage.on("change", callback: Function) => void
 ```
 
-`changes` is `key`/`newValue` map that the value is changed. If the `key` is deleted, `newValue` is `undefined`.
+Register an event listener.
+
+The storage object should implement an event interface (`on` and `off`). It should emmit a "change" event when the value is changed.
+
+Callback signature:
+
+```js
+(changes: Object<key: String, newValue: any>) => void
+```
+
+`changes` is `key` -> `newValue` object map that the value is changed. If the `key` is deleted, `newValue` is `undefined`.
+
+> Note: `createWebextStorage` uses [`event-lite`](https://www.npmjs.com/package/event-lite).
+
+#### Storage.off
+
+```js
+Storage.off("change", callback: Function) => void
+```
+
+Un-register the event listener.
 
 Changelog
 ---------
