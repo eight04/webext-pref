@@ -82,12 +82,12 @@ This module exports following members:
 ### createPref
 
 ```js
-createPref(default: Object, separator: String = "/") => Pref
+createPref(default: Object<key: String, value: any>, separator: String = "/") => Pref
 ```
 
 Create a `pref` object.
 
-`default` is a map of `key`/`defaultValue` pairs.
+`default` is a `key` -> `defaultValue` object map.
 
 `separator` would be used as the separator between the scope name and the actual key. You should choose a separator that won't appear in the key or the scope name.
 
