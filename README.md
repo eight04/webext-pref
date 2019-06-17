@@ -284,7 +284,7 @@ createView({
 
 When `destroyView` function is called, root element will be emptied and event listeners will be unbinded from the pref object.
 
-### ViewBodyItem
+#### ViewBodyItem
 
 An item has following properties:
 
@@ -322,11 +322,13 @@ If `type` is `select`, you can set `multiple` to `true` to allow users to select
 
 `validate` is a validating function. To invalidate the input, throw an error that the message is the validation message. If nothing is thrown, the input is considered valid.
 
-#### Create sections
+Here are some examples:
+
+*Create sections*
 
 TBD
 
-#### Create radio groups
+*Create radio groups*
 
 TBD
 
