@@ -1,7 +1,7 @@
 webext-pref
 ===========
 
-[![Build Status](https://travis-ci.org/eight04/webext-pref.svg?branch=master)](https://travis-ci.org/eight04/webext-pref)
+[![Build Status](https://travis-ci.com/eight04/webext-pref.svg?branch=master)](https://travis-ci.com/eight04/webext-pref)
 [![codecov](https://codecov.io/gh/eight04/webext-pref/branch/master/graph/badge.svg)](https://codecov.io/gh/eight04/webext-pref)
 
 A library to help creating scoped settings and options page in webextensions.
@@ -439,6 +439,11 @@ Un-register the event listener.
 
 Changelog
 ---------
+
+* 0.5.2 (Dec 24, 2019)
+
+  - Add: `ViewBodyItem.className`.
+  - Add: use `Node` as `help` or `label`.
 
 * 0.5.1 (Feb 18, 2019)
 
