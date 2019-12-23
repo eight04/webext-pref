@@ -295,11 +295,13 @@ An item has following properties:
   type: String,
   
   children?: Array<ViewBodyItem>,
+  className?: String,
   help?: String | Node,
   learnMore?: String,
   multiple?: Boolean,
   options?: Object<value: String, label: String>,
-  validate?: value => void
+  validate?: value => void,
+  value?: String
 }
 ```
 
@@ -311,6 +313,8 @@ The value will be stored in pref object with `key`. Except if `type` is `section
 
 `children` is a list of child items. Only available if `type` is `section`, `checkbox`, `radio`, or `radiogroup`. Note that child items of `radiogroup` must be `radio`s. If `type` is `checkbox` or `radio`, children elements will be disabled when the item is not checked.
 
+Use `className` to assign extra class name to the element.
+
 Use `help` to add some help text for the item.
 
 `learnMore` is a URL that the "Learn more" link points to.
@@ -321,15 +325,61 @@ If `type` is `select`, you can set `multiple` to `true` to allow users to select
 
 `validate` is a validating function. To invalidate the input, throw an error that the message is the validation message. If nothing is thrown, the input is considered valid.
 
+`value` is only used when `type` is `radio`.
+
 Here are some examples:
 
 *Create sections*
 
-TBD
+```js
+const body = [
+  {
+    type: "section",
+    label: "General options",
+    children: [
+      // ...
+    ],
+    className: "options-general"
+  },
+  {
+    type: "section",
+    label: "Advanced options",
+    children: [
+      // ...
+    ],
+    className: "options-advanced"
+  }
+]
 
-*Create radio groups*
+// after createView()
 
-TBD
+// access the element via the class name
+document.querySelector(".options-advanced").style.display = "none";
+```
+
+*Create a radio group*
+
+```js
+const body = [
+  {
+    key: "gender",
+    type: "radiogroup",
+    label: "gender label",
+    children: [
+      {
+        type: "radio",
+        label: "♂",
+        value: "male"
+      },
+      {
+        type: "radio",
+        label: "♀",
+        value: "female"
+      }
+    ]
+  }
+];
+```
 
 ### Storage interface
 

@@ -665,6 +665,87 @@ describe("view", () => {
     assert.equal(pref.get("foo"), "456");
   });
   
+  it("other properties", async () => {
+    const pref = createPref({
+      foo: "123"
+    });
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "text",
+          label: "foo label",
+          className: "bar",
+          help: "baz",
+          learnMore: "https://example.com/"
+        }
+      ]
+    });
+    const container = document.querySelector("input").parentNode;
+    assert(container.className.includes("bar"));
+    assert.equal(container.children[0].nodeName, "LABEL");
+    assert.equal(container.children[1].nodeName, "A");
+    assert.equal(container.children[1].href, "https://example.com/");
+    assert.equal(container.children[2].nodeName, "INPUT");
+    assert.equal(container.children[3].nodeName, "DIV");
+    assert.equal(container.children[3].textContent, "baz");
+  });
+  
+  it("use Node as label and help", async () => {
+    const pref = createPref({
+      foo: "123"
+    });
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "text",
+          label: document.createElement("p"),
+          help: document.createElement("code")
+        }
+      ]
+    });
+    assert(document.querySelector("label > p"));
+    assert(document.querySelector(".webext-pref-help > code"));
+  });
+  
+  it("change class name of radio", async () => {
+    const pref = createPref({
+      foo: "a"
+    });
+    await pref.connect(createMemoryStorage());
+    createView({
+      pref,
+      root: document.body,
+      body: [
+        {
+          key: "foo",
+          type: "radiogroup",
+          label: "foo",
+          children: [
+            {
+              type: "radio",
+              label: "B",
+              value: "b"
+            },
+            {
+              type: "radio",
+              label: "A",
+              value: "a",
+              className: "highlight"
+            }
+          ]
+        }
+      ]
+    });
+    assert(document.querySelector(".highlight > input:checked"));
+  });
 });
 
 describe("promisify", () => {
