@@ -291,11 +291,11 @@ An item has following properties:
 ```js
 {
   key: String,
-  label: String,
+  label: String | Node,
   type: String,
   
   children?: Array<ViewBodyItem>,
-  help?: String,
+  help?: String | Node,
   learnMore?: String,
   multiple?: Boolean,
   options?: Object<value: String, label: String>,
@@ -308,7 +308,6 @@ An item has following properties:
 The value will be stored in pref object with `key`. Except if `type` is `section` or `radio` since these items doesn't store value to the pref.
 
 `label` is the label/title of the item.
-
 
 `children` is a list of child items. Only available if `type` is `section`, `checkbox`, `radio`, or `radiogroup`. Note that child items of `radiogroup` must be `radio`s. If `type` is `checkbox` or `radio`, children elements will be disabled when the item is not checked.
 
