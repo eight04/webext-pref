@@ -1,6 +1,6 @@
 {
   "name": "webext-pref",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "A library to help creating scoped settings and options page in webextensions.",
   "author": "eight04 <eight04@gmail.com>",
   "license": "MIT",
