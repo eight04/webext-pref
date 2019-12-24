@@ -3,7 +3,7 @@ const assert = require("assert");
 const sinon = require("sinon");
 
 module.exports = ({createStorage, setup, cleanup}) => {
-  describe("storage", () => {
+  describe(`storage ${createStorage.name}`, () => {
     beforeEach(() => {
       if (setup) {
         setup();

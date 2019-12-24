@@ -1,9 +1,8 @@
 const {createPref} = require("./lib/pref");
-const {createWebextStorage} = require("./lib/storage");
-const {createView} = require("./lib/view");
+const {createWebextStorage, createMemoryStorage} = require("./lib/storage");
 
 module.exports = {
   createPref,
   createWebextStorage,
-  createView
+  createMemoryStorage
 };
