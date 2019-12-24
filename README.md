@@ -11,7 +11,7 @@ Features
 
 * Define an abstracted storage so it is possible to work with different storage systems e.g. [GM_webextPref](https://github.com/eight04/GM_webextPref).
 * Support multiple scopes (profiles), which allows you to apply config conditionally e.g. use different config on different domains.
-* Build the options page by passing config names and labels.
+* Build the options page by passing config names and labels. See [webext-pref-ui](https://github.com/eight04/webext-pref-ui)
 
 Installation
 ------------
@@ -77,7 +77,7 @@ This module exports following members:
 
 * `createPref` - the core function to create a pref object.
 * `createWebextStorage` - create a storage object using `browser.storage/chrome.storage`.
-* `createView` - create a form builder.
+* `createMemoryStorage` - create a storage object using memory store.
 
 ### createPref
 
@@ -165,6 +165,14 @@ async pref.set(key: String, value: Any) => void
 
 Set the value of `key` in the current scope. *This function returns a promise.*
 
+#### pref.has
+
+```js
+pref.has(key: String) => Boolean
+```
+
+Check if the pref contains `key`.
+
 #### pref.export
 
 ```js
@@ -228,158 +236,13 @@ console.log(pref.get("foo"), pref2.get("foo")); // "baz", "bak"
 // and "extension-settings/global/foo"
 ```
 
-### createView
+### createMemoryStorage
 
 ```js
-createView({
-  pref: Pref,
-  body: Array<ViewBodyItem>,
-  root: Element,
-  getNewScope?: () => newScopeName: String,
-  getMessage?: (key: String, params?: String | Array<String>) => localizedString?: String,
-  alert?: async message => void,
-  confirm?: async message => Boolean,
-  prompt?: async (message, defaultValue) => inputValue: String
-})
-  => destroyView: () => void
+createMemoryStorage() => MemoryStorage
 ```
 
-Draw the options page on specified element.
-
-`pref` is the pref object.
-
-`body` is an array of `ViewBodyItem` object:
-
-`root` is a HTML element.
-
-`getNewScope` is a function returning a scope name, which would be used as the default value when the "Add new scope" prompt is shown. Default: `() => ""`.
-
-`getMessage` is a function that is used to get localized strings. The signature is identical to `browser.i18n.getMessage`. `createView` would call this function with a key and some params. If this function returns undefined, `createView` would use the default text.
-
-| key | params | default text |
-|-----|------- | ------------ |
-|`currentScopeLabel`||`Current scope`|
-|`addScopeLabel`||`Add new scope`|
-|`addScopePrompt`||`Add new scope`|
-|`deleteScopeLabel`||`Delete current scope`|
-|`deleteScopeConfirm`|`scopeName`|`Delete scope ${scopeName}?`|
-|`learnMoreButton`||`Learn more`|
-|`importButton`||`Import`|
-|`importPrompt`||`Paste settings`|
-|`exportButton`||`Export`|
-|`exportPrompt`||`Copy settings`|
-
-`prompt`, `alert`, and `confirm` are used to display dialogs. By default, the library uses global function `prompt`, `alert`, and `confirm`.
-
-You may want to provide your own dialog functions when using `createView` in Chrome's `options_ui` (because of [this bug](https://bugs.chromium.org/p/chromium/issues/detail?id=476350)). Here is an example:
-
-```js
-createView({
-  ...
-  alert: async message => chrome.extension.getBackgroundPage().alert(message),
-  confirm: async message => chrome.extension.getBackgroundPage().confirm(message),
-  prompt: async (message, default = "") => chrome.extension.getBackgroundPage().prompt(message, default)
-});
-```
-
-When `destroyView` function is called, root element will be emptied and event listeners will be unbinded from the pref object.
-
-#### ViewBodyItem
-
-An item has following properties:
-
-```js
-{
-  key: String,
-  label: String | Node,
-  type: String,
-  
-  children?: Array<ViewBodyItem>,
-  className?: String,
-  help?: String | Node,
-  learnMore?: String,
-  multiple?: Boolean,
-  options?: Object<value: String, label: String>,
-  validate?: value => void,
-  value?: String
-}
-```
-
-`type` can be `text`, `number`, `checkbox`, `textarea`, `radiogroup`, `radio`, `select`, `color`, or `section`. `text`, `number`, `checkbox`, `textarea`, `radiogroup`, `select` and `color` will create a corresponded form element. `radio` type can only be used in `radiogroup`'s children. You can use `section` to create different sections in the pref body.
-
-The value will be stored in pref object with `key`. Except if `type` is `section` or `radio` since these items doesn't store value to the pref.
-
-`label` is the label/title of the item.
-
-`children` is a list of child items. Only available if `type` is `section`, `checkbox`, `radio`, or `radiogroup`. Note that child items of `radiogroup` must be `radio`s. If `type` is `checkbox` or `radio`, children elements will be disabled when the item is not checked.
-
-Use `className` to assign extra class name to the element.
-
-Use `help` to add some help text for the item.
-
-`learnMore` is a URL that the "Learn more" link points to.
-
-If `type` is `select`, you can set `multiple` to `true` to allow users to select multiple options.
-
-`options` is a `value` -> `label` object map. Only available if `type` is `select`.
-
-`validate` is a validating function. To invalidate the input, throw an error that the message is the validation message. If nothing is thrown, the input is considered valid.
-
-`value` is only used when `type` is `radio`.
-
-Here are some examples:
-
-*Create sections*
-
-```js
-const body = [
-  {
-    type: "section",
-    label: "General options",
-    children: [
-      // ...
-    ],
-    className: "options-general"
-  },
-  {
-    type: "section",
-    label: "Advanced options",
-    children: [
-      // ...
-    ],
-    className: "options-advanced"
-  }
-]
-
-// after createView()
-
-// access the element via the class name
-document.querySelector(".options-advanced").style.display = "none";
-```
-
-*Create a radio group*
-
-```js
-const body = [
-  {
-    key: "gender",
-    type: "radiogroup",
-    label: "gender label",
-    children: [
-      {
-        type: "radio",
-        label: "♂",
-        value: "male"
-      },
-      {
-        type: "radio",
-        label: "♀",
-        value: "female"
-      }
-    ]
-  }
-];
-```
+This is used for testing only.
 
 ### Storage interface
 
@@ -439,6 +302,11 @@ Un-register the event listener.
 
 Changelog
 ---------
+
+* 0.6.0 (Dec 24, 2019)
+
+  - **Breaking: drop `createView`.** UI related code has been moved to [webext-pref-ui](https://github.com/eight04/webext-pref-ui).
+  - Add: `pref.has`.
 
 * 0.5.2 (Dec 24, 2019)
 
